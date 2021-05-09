@@ -160,7 +160,8 @@ let goThroughModel = function(){
     lastNotes = lastNotes.slice(1);
     lastTimes = lastTimes.slice(1);
   }
-  prediction && lastNotes.push(chooseRandomNumber(Array.from(prediction.reshape([26]).dataSync()), firstRun ? 25 : 4));
+  prediction && lastNotes.push(chooseRandomNumber(Array.from(prediction[0].reshape([26]).dataSync()), firstRun ? 25 : 4));
+  prediction && lastTimes.push(prediction[1].dataSync()[0])
   firstRun = false;
 }
 
@@ -175,7 +176,7 @@ let predictMelody = function(){
     if (currentTone < -20){
       currentTone += 12;
     }
-    playAndPush(currentTone);
+    playAndPush(currentTone, lastTimes[lastTimes.length - 1]);
 }
 
 let play = false;
@@ -185,8 +186,7 @@ let playLoop = async function(){
 		await sleep(500);
 	}
 	while(play){
-		await sleep(250);
-		predictMelody();
+		await predictMelody();
 	}
 }
 playLoop();
