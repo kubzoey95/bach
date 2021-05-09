@@ -130,7 +130,7 @@ let playAndPush = async function(toneToPlay, time=0.25){
   if (noteStack.length > path.length){
   	noteStack = noteStack.slice(noteStack.length - path.length)
   }
-  await sleep(time * 1000);
+  await sleep(time * 500);
 }
 
 let chooseRandomNumber = function(weights, lnght = 4){
