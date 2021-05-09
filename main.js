@@ -130,7 +130,6 @@ let playAndPush = async function(toneToPlay, time=0.25){
   if (noteStack.length > path.length){
   	noteStack = noteStack.slice(noteStack.length - path.length)
   }
-  await sleep(time * 500);
 }
 
 let chooseRandomNumber = function(weights, lnght = 4){
@@ -174,6 +173,20 @@ let goThroughModel = function(){
   firstRun = false;
 }
 
+let pred = function(){
+    if (lastNotes.length > 2){
+      goThroughModel();
+    }
+    currentTone += lastNotes[lastNotes.length - 1] - 1 - 12;
+    if (currentTone > 30){
+      currentTone -= 12;
+    }
+    if (currentTone < -20){
+      currentTone += 12;
+    }
+    return currentTone
+}
+
 let predictMelody = async function(){
     if (lastNotes.length > 2){
       goThroughModel();
@@ -194,8 +207,17 @@ let playLoop = async function(){
 	while(!play || !synth.loaded){
 		await sleep(500);
 	}
+	let currentTone = pred();
+	let currentTime = lastTimes[lastTimes.length - 1];
 	while(play){
-		await predictMelody();
+		currentTime = lastTimes[lastTimes.length - 1];
+		let timeLeft = performance.now()
+		await playAndPush(currentTone);
+		currentTone = pred();
+		let timeLeft = (currentTime * 500) - (performance.now() - timeLeft);
+		if (timeLeft > 0){
+			await sleep(timeLeft);
+		}
 	}
 }
 playLoop();
