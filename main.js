@@ -164,10 +164,10 @@ let goThroughModel = function(){
   let timePrediction = prediction[1].dataSync()[0];
   if (lastTimes[lastTimes.length - 1] > 0.001){
       if (timePrediction > lastTimes[lastTimes.length - 1]){
-	      timePrediction = Math.ceil(timePrediction / lastTimes[lastTimes.length - 1]) * lastTimes[lastTimes.length - 1];
+	      timePrediction = Math.round(timePrediction / lastTimes[lastTimes.length - 1]) * lastTimes[lastTimes.length - 1];
       }
       else{
-	      timePrediction = lastTimes[lastTimes.length - 1] / Math.ceil(lastTimes[lastTimes.length - 1] / timePrediction);
+	      timePrediction = lastTimes[lastTimes.length - 1] / Math.round(lastTimes[lastTimes.length - 1] / timePrediction);
       }
   }
   prediction && lastTimes.push(timePrediction)
