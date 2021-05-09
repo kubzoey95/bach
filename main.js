@@ -1,11 +1,9 @@
-const KEY_TONE_MAPPING = {       "2": 1,       "3": 3,               "5": 6,       "6": 8,       "7": 10,         // black keys
-                          "q": 0,       "w": 2,       "e": 4, "r": 5,       "t": 7,       "y": 9,        "u": 11} // white keys
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 let model = null;
 let loadModel = async function(){
-  model = await tf.loadLayersModel('https://raw.githubusercontent.com/kubzoey95/chorder/main/model.json');
+  model = await tf.loadLayersModel('https://raw.githubusercontent.com/kubzoey95/bach/main/model.json');
   model.resetStates();
   console.log("Model loaded!");
   console.log(model);
@@ -47,7 +45,6 @@ let loadSynth = async function(){
 	baseUrl: "https://raw.githubusercontent.com/nbrosowsky/tonejs-instruments/master/samples/harp/"
 }).toDestination()
   synth.volume.value = -20;
-//   synth.connect(new Tone.Freeverb({roomSize : 0.9 , dampening : 3000}).toMaster());
   console.log("Synth loaded!");
   console.log(synth);
 }
@@ -75,37 +72,23 @@ let camera = null;
 const createScene = function () {
 	const scene = new BABYLON.Scene(engine);
 	scene.clearColor = new BABYLON.Color3(0, 0, 0);
-// 	if (noteStack.length > 0){
-// 		for (let note of noteStack){
-// 			note.x -= 10 * timeDelta / 1000;
-// 		}
-// 		var catmullRomSpline = BABYLON.Mesh.CreateLines("catmullRom", catmullRom.getPoints(), scene);
-// 	}
 	camera = new BABYLON.ArcRotateCamera('camera', Math.PI / 2, 0, 100, new BABYLON.Vector3(0, 0, 0), scene);
     	camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
-// 	camera.attachControl(canvas, true);
 	catmullRomSpline = BABYLON.Mesh.CreateLines(null, path, null, null, catmullRomSpline);
 	return scene;
 };
 
-const scene = createScene(); //Call the createScene function
+const scene = createScene();
 
 var updatePath = function(path) {
-// 	    let meanVect = 0;
-// 	    let cnt = 0;
 	    for (var i = 0; noteStack.length > 1 && i < noteStack.length && i < path.length; i++) {
-// 	      cnt += 1;
 	      var x = noteStack[noteStack.length - 1 - i].x;
 	      var z = noteStack[noteStack.length - 1 - i].z;
 	      var y = noteStack[noteStack.length - 1 - i].y;
 	      path[i].x = x;
 	      path[i].y = y;
 	      path[i].z = z;
-// 	      meanVect += z;
 	    }
-// 	if (cnt > 0){
-// 		camera.position.z = camera.position.z + ((meanVect / cnt) - camera.position.z) * timeDelta;
-// 	}
 };
 let render = function(){
 	catmullRomSpline = BABYLON.Mesh.CreateLines("catmullRomSpline", path, scene, true);
@@ -113,7 +96,6 @@ let render = function(){
 	    updatePath(path);
 	    catmullRomSpline = BABYLON.Mesh.CreateLines(null, path, null, null, catmullRomSpline);
 	});
-	// Register a render loop to repeatedly render the scene
 	engine.runRenderLoop(function () {
 		let perf = performance.now();
 		timeDelta = perf - time;
@@ -124,7 +106,6 @@ let render = function(){
 		scene.render();
 });
 
-// Watch for browser/canvas resize events
 window.addEventListener("resize", function () {
 	engine.resize();
 });
@@ -140,12 +121,16 @@ let currentTone = null;
 let currentChord = null;
 let lastNotes = [0,0,0];
 
-let playAndPush = function(toneToPlay){
+let currentTime = null;
+let lastTimes = [0,0,0];
+
+let playAndPush = async function(toneToPlay, time=0.25){
   synth && synth.triggerAttackRelease(Math.pow(2, (toneToPlay + 3) / 12) * 440.0, 5, Tone.now());
   noteStack.push(new BABYLON.Vector3(-canvas.getBoundingClientRect().width / 2, 0, -(toneToPlay - 5) / 25 * canvas.getBoundingClientRect().height / 2));
   if (noteStack.length > path.length){
   	noteStack = noteStack.slice(noteStack.length - path.length)
   }
+  await sleep(time * 1000);
 }
 
 let chooseRandomNumber = function(weights, lnght = 4){
@@ -170,32 +155,14 @@ let goThroughModel = function(){
   let prediction = null;
   while(lastNotes.length > 2){
     let lastNotesTensor = tf.oneHot(tf.tensor2d([lastNotes.slice(0,3)], [1, 3], 'int32'), 26);
-    prediction = model.predict([lastNotesTensor]);
+    let lastTimesTensor = tf.tensor3d([lastTimes.slice(0,3)], [1, 3, 1], 'float32');
+    prediction = model.predict([lastNotesTensor, lastTimesTensor]);
     lastNotes = lastNotes.slice(1);
+    lastTimes = lastTimes.slice(1);
   }
   prediction && lastNotes.push(chooseRandomNumber(Array.from(prediction.reshape([26]).dataSync()), firstRun ? 25 : 4));
   firstRun = false;
 }
-
-// $(document).keypress(async function(e){
-//   if(!toneStarted){
-//     await Tone.start();
-//     toneStarted = true;
-//     render();
-//   }
-//   let keyPressed = String.fromCharCode(e.keyCode || e.which).toLowerCase();
-//   if (KEY_TONE_MAPPING.hasOwnProperty(keyPressed) && currentTone !== KEY_TONE_MAPPING[keyPressed]){
-//     let diff = KEY_TONE_MAPPING[keyPressed] - currentTone;
-//     if (Math.abs(diff) > 12){
-//       diff = KEY_TONE_MAPPING[keyPressed] - ((Math.floor(KEY_TONE_MAPPING[keyPressed] / 12) * 12) + (currentTone % 12));
-//     }
-//     currentTone += diff;
-//     playAndPush(currentTone);
-//     lastNotes.push(diff + 12 + 1);
-//     console.log(lastNotes);
-//   }
-
-// })
 
 let predictMelody = function(){
     if (lastNotes.length > 2){
@@ -217,9 +184,6 @@ let playLoop = async function(){
 	while(!play || !synth.loaded){
 		await sleep(500);
 	}
-// 	let firstNote = Math.floor(Math.random() * 24) - 12;
-// 	playAndPush(firstNote);
-// 	lastNotes.push(firstNote + 12 + 1);
 	while(play){
 		await sleep(250);
 		predictMelody();
@@ -233,16 +197,3 @@ scene.onPointerObservable.add(async function(e){
 				}
 			      play = true;
 			      });
-// $(canvas).mousedown(playLoop);
-// $(document).keyup(async function(e){
-//   let keyPressed = String.fromCharCode(e.keyCode || e.which).toLowerCase();
-//   console.log(keyPressed);
-//   if(typeof model === null){
-//     return
-//   }
-//   if (KEY_TONE_MAPPING.hasOwnProperty(keyPressed)){
-//   }
-//   else {
-//     predictMelody();
-//   }
-// })
