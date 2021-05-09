@@ -155,7 +155,7 @@ let goThroughModel = function(){
   let prediction = null;
   while(lastNotes.length > 2){
     let lastNotesTensor = tf.oneHot(tf.tensor2d([lastNotes.slice(0,3)], [1, 3], 'int32'), 26);
-    let lastTimesTensor = tf.tensor3d([lastTimes.slice(0,3)], [1, 3, 1], 'float32');
+    let lastTimesTensor = tf.tensor2d([lastTimes.slice(0,3)], [1, 3], 'float32').reshape([1, 3, 1]);
     prediction = model.predict([lastNotesTensor, lastTimesTensor]);
     lastNotes = lastNotes.slice(1);
     lastTimes = lastTimes.slice(1);
