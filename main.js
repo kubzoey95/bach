@@ -170,7 +170,7 @@ let goThroughModel = function(){
 	      timePrediction = lastTimes[lastTimes.length - 1] / Math.ceil(lastTimes[lastTimes.length - 1] / timePrediction);
       }
   }
-  prediction && lastTimes.push()
+  prediction && lastTimes.push(timePrediction)
   firstRun = false;
 }
 
