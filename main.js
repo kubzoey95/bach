@@ -165,7 +165,7 @@ let goThroughModel = function(){
   firstRun = false;
 }
 
-let predictMelody = function(){
+let predictMelody = async function(){
     if (lastNotes.length > 2){
       goThroughModel();
     }
@@ -176,7 +176,7 @@ let predictMelody = function(){
     if (currentTone < -20){
       currentTone += 12;
     }
-    playAndPush(currentTone, lastTimes[lastTimes.length - 1]);
+    await playAndPush(currentTone, lastTimes[lastTimes.length - 1]);
 }
 
 let play = false;
