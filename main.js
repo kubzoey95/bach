@@ -9,7 +9,7 @@ let loadModel = async function(){
   console.log(model);
 }
 
-loadModel()
+await loadModel()
 
 let synth = 0;
 
