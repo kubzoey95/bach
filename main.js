@@ -154,22 +154,23 @@ let goThroughModel = function(){
   let prediction = null;
   while(lastNotes.length > 2){
     let lastNotesTensor = tf.oneHot(tf.tensor2d([lastNotes.slice(0,3)], [1, 3], 'int32'), 26);
-    let lastTimesTensor = tf.tensor2d([lastTimes.slice(0,3)], [1, 3], 'float32').reshape([1, 3, 1]);
+    let lastTimesTensor = tf.oneHot(tf.tensor2d([lastNotes.slice(0,3)], [1, 3], 'int32'), 17);
     prediction = model.predict([lastNotesTensor, lastTimesTensor]);
     lastNotes = lastNotes.slice(1);
     lastTimes = lastTimes.slice(1);
   }
   prediction && lastNotes.push(chooseRandomNumber(Array.from(prediction[0].reshape([26]).dataSync()), firstRun ? 25 : 4));
-  let timePrediction = prediction[1].dataSync()[0];
-  if (lastTimes[lastTimes.length - 1] > 0.001){
-      if (timePrediction > lastTimes[lastTimes.length - 1]){
-	      timePrediction = Math.round(timePrediction / lastTimes[lastTimes.length - 1]) * lastTimes[lastTimes.length - 1];
-      }
-      else{
-	      timePrediction = lastTimes[lastTimes.length - 1] / Math.round(lastTimes[lastTimes.length - 1] / timePrediction);
-      }
-  }
-  prediction && lastTimes.push(timePrediction)
+  prediction && lastTimes.push(chooseRandomNumber(Array.from(prediction[1].reshape([17]).dataSync()), firstRun ? 16 : 4));
+//   let timePrediction = prediction[1].dataSync()[0];
+//   if (lastTimes[lastTimes.length - 1] > 0.001){
+//       if (timePrediction > lastTimes[lastTimes.length - 1]){
+// 	      timePrediction = Math.round(timePrediction / lastTimes[lastTimes.length - 1]) * lastTimes[lastTimes.length - 1];
+//       }
+//       else{
+// 	      timePrediction = lastTimes[lastTimes.length - 1] / Math.round(lastTimes[lastTimes.length - 1] / timePrediction);
+//       }
+//   }
+//   prediction && lastTimes.push(timePrediction)
   firstRun = false;
 }
 
@@ -208,9 +209,9 @@ let playLoop = async function(){
 		await sleep(500);
 	}
 	let currentTone = pred();
-	let currentTime = lastTimes[lastTimes.length - 1];
+	let currentTime = Math.pow(2, lastTimes[lastTimes.length - 1] - 9);
 	while(play){
-		currentTime = lastTimes[lastTimes.length - 1];
+		currentTime = Math.pow(2, lastTimes[lastTimes.length - 1] - 9);
 		let timeLeft = performance.now()
 		await playAndPush(currentTone);
 		currentTone = pred();
