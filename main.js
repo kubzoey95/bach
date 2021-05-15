@@ -161,8 +161,8 @@ let goThroughModel = function(){
   }
   prediction && lastNotes.push(chooseRandomNumber(Array.from(prediction[0].reshape([26]).dataSync()), firstRun ? 25 : 4));
   let predTimes = prediction[1].reshape([2, 4]);
-  let probs = Array.from(predTimes[0].dataSync());
-  let vals = Array.from(predTimes[1].dataSync());
+  let probs = Array.from(prediction[1].slice([0,0,0],[1,4,1]).dataSync());
+  let vals = Array.from(prediction[1].slice([0,0,1],[1,4,1]).dataSync());
   prediction && lastTimes.push(vals[chooseRandomNumber(probs, probs.length)]);
 //   let timePrediction = prediction[1].dataSync()[0];
 //   if (lastTimes[lastTimes.length - 1] > 0.001){
