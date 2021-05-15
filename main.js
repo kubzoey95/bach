@@ -210,7 +210,7 @@ let playLoop = async function(){
 		await sleep(500);
 	}
 	let currentTone = pred();
-	let currentTime = Math.pow(2, lastTimes[lastTimes.length - 1] - 9);
+	let currentTime = lastTimes[lastTimes.length - 1];
 	while(play){
 		currentTime = lastTimes[lastTimes.length - 1];
 		let timeLeft = performance.now()
