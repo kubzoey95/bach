@@ -122,7 +122,7 @@ let currentChord = null;
 let lastNotes = [0,0,0];
 
 let currentTime = null;
-let lastTimes = [0,0,0];
+let lastTimes = [-100,-100,-100];
 
 let playAndPush = async function(toneToPlay, time=0.25){
   synth && synth.triggerAttackRelease(Math.pow(2, (toneToPlay + 3) / 12) * 440.0, 5, Tone.now());
@@ -154,13 +154,14 @@ let goThroughModel = function(){
   let prediction = null;
   while(lastNotes.length > 2){
     let lastNotesTensor = tf.oneHot(tf.tensor2d([lastNotes.slice(0,3)], [1, 3], 'int32'), 26);
-    let lastTimesTensor = tf.oneHot(tf.tensor2d([lastNotes.slice(0,3)], [1, 3], 'int32'), 17);
+    let lastTimesTensor = tf.tensor2d([lastNotes.slice(0,3)], [1, 3], 'int32');
     prediction = model.predict([lastNotesTensor, lastTimesTensor]);
     lastNotes = lastNotes.slice(1);
     lastTimes = lastTimes.slice(1);
   }
   prediction && lastNotes.push(chooseRandomNumber(Array.from(prediction[0].reshape([26]).dataSync()), firstRun ? 25 : 4));
-  prediction && lastTimes.push(chooseRandomNumber(Array.from(prediction[1].reshape([17]).dataSync()), firstRun ? 16 : 4));
+  let predTimes = Array.from(prediction[1].reshape([2, 4]).dataSync());
+  prediction && lastTimes.push(predTimes[1][chooseRandomNumber(predTimes[0], predTimes[0].length)]);
 //   let timePrediction = prediction[1].dataSync()[0];
 //   if (lastTimes[lastTimes.length - 1] > 0.001){
 //       if (timePrediction > lastTimes[lastTimes.length - 1]){
@@ -211,7 +212,7 @@ let playLoop = async function(){
 	let currentTone = pred();
 	let currentTime = Math.pow(2, lastTimes[lastTimes.length - 1] - 9);
 	while(play){
-		currentTime = Math.pow(2, Math.min(lastTimes[lastTimes.length - 1] - 9, 4));
+		currentTime = lastTimes[lastTimes.length - 1];
 		let timeLeft = performance.now()
 		await playAndPush(currentTone);
 		currentTone = pred();
