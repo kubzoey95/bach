@@ -1,7 +1,6 @@
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
 let model = null;
 let loadModel = async function(){
   model = await tf.loadLayersModel('https://raw.githubusercontent.com/kubzoey95/bach/main/model.json');
