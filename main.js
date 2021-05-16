@@ -219,7 +219,7 @@ let playLoop = async function(){
 		let timeLeft = performance.now()
 		await playAndPush(currentTone);
 		currentTone = pred();
-		timeLeft = (currentTime * 500) - (performance.now() - timeLeft);
+		timeLeft = (currentTime * 8000) - (performance.now() - timeLeft);
 		if (timeLeft > 0){
 			await sleep(timeLeft);
 		}
