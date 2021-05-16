@@ -165,14 +165,14 @@ let goThroughModel = function(){
   let vals = Array.from(prediction[1].slice([0,0,1],[1,4,1]).dataSync());
 //   prediction && lastTimes.push();
   let timePrediction = vals[chooseRandomNumber(probs, probs.length)];
-  if (lastTimes[lastTimes.length - 1] > 0.001){
-      if (timePrediction > lastTimes[lastTimes.length - 1]){
-	      timePrediction = Math.round(timePrediction / lastTimes[lastTimes.length - 1]) * lastTimes[lastTimes.length - 1];
-      }
-      else{
-	      timePrediction = lastTimes[lastTimes.length - 1] / Math.round(lastTimes[lastTimes.length - 1] / timePrediction);
-      }
-  }
+//   if (lastTimes[lastTimes.length - 1] > 0.001){
+//       if (timePrediction > lastTimes[lastTimes.length - 1]){
+// 	      timePrediction = Math.round(timePrediction / lastTimes[lastTimes.length - 1]) * lastTimes[lastTimes.length - 1];
+//       }
+//       else{
+// 	      timePrediction = lastTimes[lastTimes.length - 1] / Math.round(lastTimes[lastTimes.length - 1] / timePrediction);
+//       }
+//   }
 	
   prediction && lastTimes.push(timePrediction)
   firstRun = false;
@@ -213,13 +213,13 @@ let playLoop = async function(){
 		await sleep(500);
 	}
 	let currentTone = pred();
-	let currentTime = lastTimes[lastTimes.length - 1];
+	let currentTime = Math.pow(2, (lastTimes[lastTimes.length - 1] - 0.5) * 8);
 	while(play){
-		currentTime = lastTimes[lastTimes.length - 1];
+		currentTime = Math.pow(2, (lastTimes[lastTimes.length - 1] - 0.5) * 8);
 		let timeLeft = performance.now()
 		await playAndPush(currentTone);
 		currentTone = pred();
-		timeLeft = (currentTime * 8000) - (performance.now() - timeLeft);
+		timeLeft = (currentTime * 1000) - (performance.now() - timeLeft);
 		if (timeLeft > 0){
 			await sleep(timeLeft);
 		}
