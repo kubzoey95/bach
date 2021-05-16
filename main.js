@@ -173,6 +173,7 @@ let goThroughModel = function(){
 	      timePrediction = lastTimes[lastTimes.length - 1] / Math.round(lastTimes[lastTimes.length - 1] / timePrediction);
       }
   }
+	
   prediction && lastTimes.push(timePrediction)
   firstRun = false;
 }
