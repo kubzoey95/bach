@@ -163,17 +163,17 @@ let goThroughModel = function(){
   let predTimes = prediction[1].reshape([2, 4]);
   let probs = Array.from(prediction[1].slice([0,0,0],[1,4,1]).dataSync());
   let vals = Array.from(prediction[1].slice([0,0,1],[1,4,1]).dataSync());
-  prediction && lastTimes.push(vals[chooseRandomNumber(probs, probs.length)]);
-//   let timePrediction = prediction[1].dataSync()[0];
-//   if (lastTimes[lastTimes.length - 1] > 0.001){
-//       if (timePrediction > lastTimes[lastTimes.length - 1]){
-// 	      timePrediction = Math.round(timePrediction / lastTimes[lastTimes.length - 1]) * lastTimes[lastTimes.length - 1];
-//       }
-//       else{
-// 	      timePrediction = lastTimes[lastTimes.length - 1] / Math.round(lastTimes[lastTimes.length - 1] / timePrediction);
-//       }
-//   }
-//   prediction && lastTimes.push(timePrediction)
+//   prediction && lastTimes.push();
+  let timePrediction = vals[chooseRandomNumber(probs, probs.length)];
+  if (lastTimes[lastTimes.length - 1] > 0.001){
+      if (timePrediction > lastTimes[lastTimes.length - 1]){
+	      timePrediction = Math.round(timePrediction / lastTimes[lastTimes.length - 1]) * lastTimes[lastTimes.length - 1];
+      }
+      else{
+	      timePrediction = lastTimes[lastTimes.length - 1] / Math.round(lastTimes[lastTimes.length - 1] / timePrediction);
+      }
+  }
+  prediction && lastTimes.push(timePrediction)
   firstRun = false;
 }
 
@@ -218,7 +218,7 @@ let playLoop = async function(){
 		let timeLeft = performance.now()
 		await playAndPush(currentTone);
 		currentTone = pred();
-		timeLeft = (currentTime * 500) - (performance.now() - timeLeft);
+		timeLeft = (currentTime * 1000) - (performance.now() - timeLeft);
 		if (timeLeft > 0){
 			await sleep(timeLeft);
 		}
